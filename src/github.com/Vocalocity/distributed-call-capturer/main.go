@@ -1,21 +1,36 @@
 package main
 
 import "fmt"
-import "flag"
+
+import "github.com/spf13/cobra"
 
 func main() {
-	var mode = flag.String("mode", "client", "Mode of execution:  server (handle commands) or client (capture data)")
-	flag.Parse()
-	fmt.Println("mode", *mode)
 
-	switch *mode {
-	case "client":
-		fmt.Println("initializing " + *mode)
-	case "server":
-		fmt.Println("initializing " + *mode)
-		s := Server{}
-		s.init()
-	default:
-		panic("Unable to initialize for mode " + *mode)
+	var serverCommand = &cobra.Command{
+		Use:   "server",
+		Short: "server mode",
+		Long: `Execute distributed-call-capturer in server mode, accepting HTTP 
+    requests and publishing commands to client agents for call capture
+    `,
+		Run: func(cmd *cobra.Command, args []string) {
+			fmt.Println("initializing in server mode")
+			s := Server{}
+			s.init()
+		},
 	}
+
+	var clientCommand = &cobra.Command{
+		Use:   "client",
+		Short: "client mode",
+		Long: `Execute distributed-call-capturer in client mode, listening for
+    server rpc commands and capturing pcap for SIP/RTP
+    `,
+		Run: func(cmd *cobra.Command, args []string) {
+			fmt.Println("initializing in client mode")
+		},
+	}
+
+	var rootCmd = &cobra.Command{Use: "app"}
+	rootCmd.AddCommand(serverCommand, clientCommand)
+	rootCmd.Execute()
 }
