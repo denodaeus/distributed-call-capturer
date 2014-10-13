@@ -1,7 +1,6 @@
 package main
 
-import "fmt"
-
+import "log"
 import "github.com/spf13/cobra"
 
 func main() {
@@ -13,7 +12,7 @@ func main() {
     requests and publishing commands to client agents for call capture
     `,
 		Run: func(cmd *cobra.Command, args []string) {
-			fmt.Println("initializing in server mode")
+			log.Println("initializing in server mode")
 			s := Server{}
 			s.init()
 		},
@@ -26,7 +25,7 @@ func main() {
     server rpc commands and capturing pcap for SIP/RTP
     `,
 		Run: func(cmd *cobra.Command, args []string) {
-			fmt.Println("initializing in client mode")
+			log.Println("initializing in client mode")
 			c := Client{}
 			c.init()
 		},
