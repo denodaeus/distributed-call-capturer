@@ -30,7 +30,7 @@ func main() {
 		},
 	}
 
-	var rootCmd = &cobra.Command{Use: "app"}
+	var rootCmd = &cobra.Command{Use: "distributed-call-capturer"}
 	rootCmd.AddCommand(serverCommand, clientCommand)
 	rootCmd.Execute()
 }
