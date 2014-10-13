@@ -27,6 +27,8 @@ func main() {
     `,
 		Run: func(cmd *cobra.Command, args []string) {
 			fmt.Println("initializing in client mode")
+			c := Client{}
+			c.init()
 		},
 	}
 
