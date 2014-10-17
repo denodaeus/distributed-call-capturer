@@ -32,7 +32,24 @@ type ApiReply struct {
 
 type ApiService struct{}
 
+type RegisteredClient struct {
+	Hostname string
+	Role     string
+}
+
+var clients = make([]RegisteredClient, 10)
+
 func (a *ApiService) Say(r *http.Request, args *ApiArgs, reply *ApiReply) error {
 	reply.Message = "Hello, " + args.Who + "!"
+	return nil
+}
+
+func (a *ApiService) Register(r *http.Request, args *RegisteredClient, reply *ApiReply) error {
+	hostname := args.Hostname
+	role := args.Role
+	clients = append(clients, RegisteredClient{Hostname: hostname, Role: role})
+	message := "Registered client: " + hostname + "with role " + role
+	reply.Message = message
+	log.Println(message)
 	return nil
 }
