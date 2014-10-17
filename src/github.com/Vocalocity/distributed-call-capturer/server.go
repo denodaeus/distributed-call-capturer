@@ -30,6 +30,10 @@ type ApiReply struct {
 	Message string
 }
 
+type RegisterResponse struct {
+	Message string
+}
+
 type ApiService struct{}
 
 type RegisteredClient struct {
@@ -44,7 +48,7 @@ func (a *ApiService) Say(r *http.Request, args *ApiArgs, reply *ApiReply) error 
 	return nil
 }
 
-func (a *ApiService) Register(r *http.Request, args *RegisteredClient, reply *ApiReply) error {
+func (a *ApiService) RegisterClient(r *http.Request, args *RegisteredClient, reply *ApiReply) error {
 	hostname := args.Hostname
 	role := args.Role
 	clients = append(clients, RegisteredClient{Hostname: hostname, Role: role})
