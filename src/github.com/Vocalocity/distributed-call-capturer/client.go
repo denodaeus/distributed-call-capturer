@@ -18,10 +18,11 @@ type Client struct {
 }
 
 const DefaultRemoteAddr = "127.0.0.1"
+const RPC_PORT = "8080"
+const RPC_URL = "http://" + DefaultRemoteAddr + ":" + RPC_PORT + "/rpc"
+const role = "controller"
 
 var hostname, _ = os.Hostname()
-
-const role = "controller"
 
 //init creates a new client agent to listen on configured bind settings
 func (c Client) init() {
@@ -36,7 +37,7 @@ func execute(s *rpc.Server, method string, req, res interface{}) error {
 
 	buf, _ := json.EncodeClientRequest(method, req)
 	body := bytes.NewBuffer(buf)
-	r, _ := http.NewRequest("POST", "http://localhost:8080/", body)
+	r, _ := http.NewRequest("POST", RPC_URL, body)
 	r.Header.Set("Content-Type", "application/json")
 
 	w := httptest.NewRecorder()
