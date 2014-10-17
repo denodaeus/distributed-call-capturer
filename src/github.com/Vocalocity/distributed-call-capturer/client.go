@@ -26,6 +26,7 @@ const role = "controller"
 //init creates a new client agent to listen on configured bind settings
 func (c Client) init() {
 	log.Println("Initializing client daemon for RPC communication ...")
+	c.Register()
 }
 
 func execute(s *rpc.Server, method string, req, res interface{}) error {

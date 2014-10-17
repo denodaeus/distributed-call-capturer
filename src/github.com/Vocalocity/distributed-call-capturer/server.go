@@ -52,7 +52,7 @@ func (a *ApiService) RegisterClient(r *http.Request, args *RegisteredClient, rep
 	hostname := args.Hostname
 	role := args.Role
 	clients = append(clients, RegisteredClient{Hostname: hostname, Role: role})
-	message := "Registered client: " + hostname + "with role " + role
+	message := "Registered client: " + hostname + " with role " + role
 	reply.Message = message
 	log.Println(message)
 	return nil
