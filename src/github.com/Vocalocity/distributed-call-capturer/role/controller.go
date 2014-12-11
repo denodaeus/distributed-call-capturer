@@ -1,6 +1,7 @@
 package role
 
 import (
+	"github.com/Vocalocity/distributed-call-capturer/adapter"
 	"log"
 )
 
@@ -8,6 +9,7 @@ type Controller struct{}
 
 func (c Controller) Start(callId string) {
 	log.Println("start :: starting tracing for callid=" + callId)
+	sip := Sip.Trace(callId)
 }
 
 func (c Controller) Stop(callId string) {
