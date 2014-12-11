@@ -1,11 +1,8 @@
 package server
 
 import (
-	"fmt"
-	"github.com/gorilla/rpc"
-	"github.com/gorilla/rpc/json"
+	"github.com/koding/kite"
 	"log"
-	"net/http"
 )
 
 // Server is the server daemon used to query current running jobs and submit new capture jobs.
@@ -16,54 +13,35 @@ type Server struct{}
 func (s Server) Init() {
 	log.Println("Initializing server daemon for RPC communication ...")
 
-	r := rpc.NewServer()
-	r.RegisterCodec(json.NewCodec(), "application/json")
-	r.RegisterService(new(APIService), "")
-	http.Handle("/rpc", r)
-	http.ListenAndServe("localhost:8080", nil)
-}
+	k := kite.New("server", "1.0.0")
+	k.Config.Port = 6000
+	k.Config.DisableAuthentication = true
 
-// APIReply is the API reply object
-type APIReply struct {
-	Message string
-}
+	k.HandleFunc("register", func(r *kite.Request) (interface{}, error) {
+		a := r.Args.One().MustString()
+		log.Println("register :: sending register request, a" + a)
+		return a, nil
+	})
 
-// RegisterResponse is the server response to register request
-type RegisterResponse struct {
-	Message string
-}
+	k.HandleFunc("start", func(r *kite.Request) (interface{}, error) {
+		a := r.Args.One().MustString()
+		log.Println("start :: received start for call-id " + a)
+		return a, nil
+	})
 
-// APIService is the service definition
-type APIService struct{}
+	k.HandleFunc("stop", func(r *kite.Request) (interface{}, error) {
+		a := r.Args.One().MustString()
+		log.Println("stop :: received stop for call-id" + a)
+		return a, nil
+	})
 
-// RegisteredClient is the exported client registration
-type RegisteredClient struct {
-	Hostname string
-	Role     string
-}
+	k.HandleFunc("stream", func(r *kite.Request) (interface{}, error) {
+		args := r.Args.MustSliceOfLength(2)
+		client := args[0].MustString()
+		cid := args[1].MustString()
+		log.Println("stream :: received stream for call-id" + cid + ", client=" + client)
+		return cid, nil
+	})
 
-var clients = make([]RegisteredClient, 0)
-
-// RegisterClient registers this client to the RPC server
-func (a *APIService) RegisterClient(r *http.Request, args *RegisteredClient, reply *APIReply) error {
-	hostname := args.Hostname
-	role := args.Role
-	clients = append(clients, RegisteredClient{Hostname: hostname, Role: role})
-	message := "Registered client: " + hostname + " with role " + role
-	reply.Message = message
-	log.Println(message)
-	return nil
-}
-
-// ListArgs args count for ListClients
-type ListArgs struct {
-	Count string
-}
-
-// ListClients lists registered clients
-func (a *APIService) ListClients(r *http.Request, args *ListArgs, reply *APIReply) error {
-	message := fmt.Sprintf("%v", clients)
-	log.Println(message)
-	reply.Message = message
-	return nil
+	k.Run()
 }

@@ -3,6 +3,9 @@ package main
 import "log"
 import "github.com/spf13/cobra"
 
+import "github.com/Vocalocity/distributed-call-capturer/client"
+import "github.com/Vocalocity/distributed-call-capturer/server"
+
 func main() {
 
 	var serverCommand = &cobra.Command{
@@ -13,8 +16,8 @@ func main() {
     `,
 		Run: func(cmd *cobra.Command, args []string) {
 			log.Println("initializing in server mode")
-			s := Server{}
-			s.init()
+			s := server.Server{}
+			s.Init()
 		},
 	}
 
@@ -26,8 +29,8 @@ func main() {
     `,
 		Run: func(cmd *cobra.Command, args []string) {
 			log.Println("initializing in client mode")
-			c := Client{}
-			c.init()
+			c := client.Client{}
+			c.Init()
 		},
 	}
 

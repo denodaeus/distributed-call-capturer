@@ -1,13 +1,9 @@
 package client
 
 import (
-	"bytes"
-	"github.com/Vocalocity/distributed-call-capturer/server"
-	"github.com/gorilla/rpc"
-	"github.com/gorilla/rpc/json"
+	"fmt"
+	"github.com/koding/kite"
 	"log"
-	"net/http"
-	"net/http/httptest"
 	"os"
 )
 
@@ -28,34 +24,24 @@ var hostname, _ = os.Hostname()
 //Init creates a new client agent to listen on configured bind settings
 func (c Client) Init() {
 	log.Println("Initializing client daemon for RPC communication ...")
-	c.Register()
+
+	k := kite.New("client", "1.0.0")
+	client := k.NewClient("http://localhost:6000/kite")
+	client.Dial()
+
+	response, _ := client.Tell("register", "controller")
+	fmt.Println(response.MustString())
+
+	response, _ = client.Tell("start", "123457@7.8.9.10")
+	fmt.Println(response.MustString())
+
+	response, _ = client.Tell("stop", "123457@7.8.9.10")
+	fmt.Println(response.MustString())
+
+	response, _ = client.Tell("stream", "localhost:11211", "123457@7.8.9.10")
+	fmt.Println(response.MustString())
+
 }
 
-func execute(s *rpc.Server, method string, req, res interface{}) error {
-	if !s.HasMethod(method) {
-		//t.Fatal("RPC Expected method to be exported: ", method)
-	}
-
-	buf, _ := json.EncodeClientRequest(method, req)
-	body := bytes.NewBuffer(buf)
-	r, _ := http.NewRequest("POST", rpcURL, body)
-	r.Header.Set("Content-Type", "application/json")
-
-	w := httptest.NewRecorder()
-	s.ServeHTTP(w, r)
-
-	return json.DecodeClientResponse(w.Body, res)
-}
-
-// Register the Rpc Client
-func (c *Client) Register() {
-	log.Println("Registering client " + c.Hostname + " to server ")
-
-	s := rpc.NewServer()
-	s.RegisterCodec(json.NewCodec(), "application/json")
-	s.RegisterService(new(server.APIService), "")
-
-	var res server.RegisterResponse
-	execute(s, "APIService.RegisterClient", &server.RegisteredClient{hostname, role}, &res)
-	return
+func (c Client) Register() {
 }
