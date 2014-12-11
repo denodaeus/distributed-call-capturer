@@ -2,17 +2,14 @@ package adapter
 
 import (
 	"code.google.com/p/gopacket"
-	"code.google.com/p/gopacket/dumpcommand"
 	"code.google.com/p/gopacket/layers"
 	"code.google.com/p/gopacket/pcap"
 	"fmt"
 	"log"
 	"net"
 	"sync"
-	"time"
 )
 
-// var iface = "eth0"
 var promisc = "true"
 
 type Sip struct {
@@ -20,28 +17,7 @@ type Sip struct {
 	Port   int
 }
 
-func (s Sip) listIfaces() {
-	ifaces, err := net.Interfaces()
-	if err != nil {
-		panic(err)
-	}
-
-	var wg sync.WaitGroup
-	for _, iface := range ifaces {
-		wg.Add(1)
-
-		go func(iface net.Interface) {
-			defer wg.Done()
-			if err := scan(&iface); err != nil {
-				log.Printf("interface %v: %v", iface.Name, err)
-			}
-
-		}(iface)
-	}
-	wg.Wait()
-}
-
-func (s Sip) Trace(filter string) {
+func scan(iface *net.Interface, filter string) error {
 
 	log.Printf("Trace :: starting trace for filter=" + filter)
 	var addr *net.IPNet
@@ -77,17 +53,32 @@ func (s Sip) Trace(filter string) {
 
 	stop := make(chan struct{})
 	go readSIP(handle, iface, stop)
+	defer close(stop)
+	return nil
 }
 
-func (s Sip) constructDataSource(iface string) {
-	log.Println("constructDataSource :: ")
-	// packetSource := // construct packet source
-	// for packet := range packetSource.Packets() {
-	// 	handlePacket(packet)
-	// }
+func (s Sip) Trace(filter string) {
+	ifaces, err := net.Interfaces()
+	if err != nil {
+		panic(err)
+	}
+
+	var wg sync.WaitGroup
+	for _, iface := range ifaces {
+		wg.Add(1)
+
+		go func(iface net.Interface) {
+			defer wg.Done()
+			if err := scan(&iface, filter); err != nil {
+				log.Printf("interface %v: %v", iface.Name, err)
+			}
+
+		}(iface)
+	}
+	wg.Wait()
 }
 
-func (s Sip) readSIP(handle *pcap.Handle, iface *net.Interface, stop chan struct{}) {
+func readSIP(handle *pcap.Handle, iface *net.Interface, stop chan struct{}) {
 	src := gopacket.NewPacketSource(handle, layers.LayerTypeEthernet)
 	in := src.Packets()
 	for {
@@ -101,11 +92,7 @@ func (s Sip) readSIP(handle *pcap.Handle, iface *net.Interface, stop chan struct
 				continue
 			}
 			udp := udpLayer.(*layers.UDP)
-			log.Printf("IP %v is at %v", net.IP(udp.SourceProtAddress), net.HardwareAddr(udp.SourceHwAddress))
+			log.Printf("IP %s is at %s", udp)
 		}
 	}
-}
-
-func (s Sip) handlePacket(p Packet) {
-	log.Println("handlePacket :: ")
 }

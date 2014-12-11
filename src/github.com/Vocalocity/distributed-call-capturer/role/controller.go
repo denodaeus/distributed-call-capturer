@@ -9,7 +9,8 @@ type Controller struct{}
 
 func (c Controller) Start(callId string) {
 	log.Println("start :: starting tracing for callid=" + callId)
-	sip := Sip.Trace(callId)
+	s := adapter.Sip{"127.0.0.1", 5060}
+	s.Trace(callId)
 }
 
 func (c Controller) Stop(callId string) {
