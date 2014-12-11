@@ -1,6 +1,7 @@
 package server
 
 import (
+	"github.com/Vocalocity/distributed-call-capturer/role"
 	"github.com/koding/kite"
 	"log"
 )
@@ -26,6 +27,8 @@ func (s Server) Init() {
 	k.HandleFunc("start", func(r *kite.Request) (interface{}, error) {
 		a := r.Args.One().MustString()
 		log.Println("start :: received start for call-id " + a)
+		c := new(role.Controller)
+		c.Start(a)
 		return a, nil
 	})
 

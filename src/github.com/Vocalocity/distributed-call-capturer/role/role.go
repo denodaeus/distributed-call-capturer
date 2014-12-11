@@ -1,7 +1,7 @@
 package role
 
 type role interface {
-	Start() bool
-	Stop() bool
-	Stream() bool
+	Start(callId string) bool
+	Stop(callId string) bool
+	Stream(client string, callId string) bool
 }
